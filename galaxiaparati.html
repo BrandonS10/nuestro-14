@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestra Galaxia de Amor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e27;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .galaxy-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #ff69b4;
+            font-size: clamp(2rem, 5vw, 48px);
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(255, 105, 180, 0.6), 0 0 40px rgba(200, 100, 200, 0.4);
+            pointer-events: none;
+            animation: floatTitle 6s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        .clock-section {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #ffb6d9;
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
+            font-weight: 400;
+            letter-spacing: 1px;
+            text-shadow: 0 0 15px rgba(255, 105, 180, 0.4);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .countdown-section {
+            position: absolute;
+            top: 130px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #ff85c1;
+            font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+            font-weight: 500;
+            text-shadow: 0 0 15px rgba(255, 105, 180, 0.4);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .countdown-values {
+            display: flex;
+            gap: clamp(10px, 3vw, 20px);
+            justify-content: center;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .countdown-item {
+            background: rgba(200, 100, 220, 0.15);
+            border: 1px solid #ff69b4;
+            border-radius: 8px;
+            padding: clamp(5px, 2vw, 10px) clamp(8px, 3vw, 15px);
+            font-size: clamp(0.7rem, 2vw, 0.95rem);
+            font-weight: 600;
+        }
+
+        @keyframes floatTitle {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-20px); }
+        }
+
+        .phrases-section {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 90%;
+            pointer-events: all;
+            z-index: 10;
+        }
+
+        .phrase-item {
+            background: rgba(200, 100, 220, 0.15);
+            border: 2px solid #ff69b4;
+            border-radius: 50px;
+            padding: 15px 30px;
+            cursor: pointer;
+            color: #ffb6d9;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.3);
+            user-select: none;
+            position: relative;
+        }
+
+        .phrase-item:hover {
+            background: rgba(200, 100, 220, 0.25);
+            box-shadow: 0 0 25px rgba(255, 105, 180, 0.6);
+            transform: scale(1.05);
+        }
+
+        .phrase-item::before {
+            content: '♥';
+            margin-right: 8px;
+            color: #ff69b4;
+        }
+
+        /* Modal de frase expandida */
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, rgba(200, 100, 220, 0.9) 0%, rgba(255, 105, 180, 0.8) 100%);
+            border: 2px solid #ff69b4;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+            color: white;
+            z-index: 100;
+            pointer-events: all;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 40px rgba(255, 105, 180, 0.6), 0 0 80px rgba(200, 100, 200, 0.3);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .modal.active {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .modal-phrase {
+            font-size: 28px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-style: italic;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-close {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-close:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .btn-remove {
+            background: rgba(255, 100, 130, 0.8);
+            color: white;
+            border: 2px solid rgba(255, 100, 130, 1);
+        }
+
+        .btn-remove:hover {
+            background: rgba(255, 100, 130, 1);
+            transform: scale(1.05);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0);
+            z-index: 99;
+            pointer-events: none;
+            transition: background 0.3s ease;
+        }
+
+        .overlay.active {
+            background: rgba(0, 0, 0, 0.5);
+            pointer-events: all;
+        }
+
+        /* Fotos flotantes */
+        .photos-section {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .photo {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 15px;
+            border: 3px solid #ff69b4;
+            background: rgba(200, 100, 220, 0.2);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            pointer-events: all;
+            box-shadow: 0 0 25px rgba(255, 105, 180, 0.4);
+            transition: transform 0.3s ease;
+            user-select: none;
+        }
+
+        .photo:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 35px rgba(255, 105, 180, 0.6);
+        }
+
+        .photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .photo-placeholder {
+            text-align: center;
+            color: #ffb6d9;
+            font-size: 12px;
+            padding: 10px;
+            line-height: 1.4;
+        }
+
+        .instruction {
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #ffb6d9;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+        }
+
+        .instruction p {
+            margin: 5px 0;
+        }
+
+        /* Responsive para tablets y móviles */
+        @media (max-width: 768px) {
+            .title {
+                top: 15px;
+            }
+
+            .clock-section {
+                top: 70px;
+                font-size: 0.9rem;
+            }
+
+            .countdown-section {
+                top: 110px;
+                font-size: 0.8rem;
+            }
+
+            .countdown-item {
+                padding: 5px 10px;
+                font-size: 0.75rem;
+            }
+
+            .phrase-item {
+                padding: 12px 25px;
+                font-size: 12px;
+            }
+
+            .photo {
+                width: 100px;
+                height: 100px;
+            }
+
+            .modal {
+                max-width: 90%;
+                padding: 30px 20px;
+            }
+
+            .modal-phrase {
+                font-size: 22px;
+            }
+
+            .btn {
+                padding: 10px 25px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                top: 10px;
+                font-size: 1.8rem;
+            }
+
+            .clock-section {
+                top: 60px;
+                font-size: 0.75rem;
+            }
+
+            .countdown-section {
+                top: 95px;
+                font-size: 0.7rem;
+            }
+
+            .countdown-values {
+                gap: 8px;
+            }
+
+            .countdown-item {
+                padding: 4px 8px;
+                font-size: 0.65rem;
+                border-radius: 5px;
+            }
+
+            .instruction {
+                bottom: 130px;
+                font-size: 0.75rem;
+            }
+
+            .phrases-section {
+                bottom: 30px;
+                gap: 15px;
+                max-width: 95%;
+            }
+
+            .phrase-item {
+                padding: 10px 20px;
+                font-size: 11px;
+            }
+
+            .photo {
+                width: 85px;
+                height: 85px;
+            }
+
+            .modal {
+                max-width: 95%;
+                padding: 25px 15px;
+            }
+
+            .modal-phrase {
+                font-size: 18px;
+            }
+
+            .btn {
+                padding: 8px 20px;
+                font-size: 11px;
+            }
+        }
+
+        .instruction {
+            position: absolute;
+            top: 120px;
+            right: 40px;
+            color: rgba(255, 105, 180, 0.6);
+            font-size: 12px;
+            text-align: right;
+            pointer-events: none;
+            max-width: 200px;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 32px;
+            }
+
+            .phrases-section {
+                gap: 15px;
+            }
+
+            .phrase-item {
+                font-size: 12px;
+                padding: 10px 20px;
+            }
+
+            .modal {
+                max-width: 85%;
+                padding: 30px 20px;
+            }
+
+            .modal-phrase {
+                font-size: 20px;
+            }
+
+            .photo {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Canvas para la galaxia -->
+    <canvas id="galaxyCanvas"></canvas>
+
+    <!-- Contenedor principal -->
+    <div class="container">
+        <!-- Fotos flotantes -->
+        <div class="photos-section" id="photosSection">
+            <!-- Las fotos se agregarán aquí dinámicamente -->
+        </div>
+
+        <!-- UI Layer -->
+        <div class="ui-layer">
+            <h1 class="title">✨ Nuestra Galaxia ✨</h1>
+            
+            <div class="clock-section" id="clockSection">
+                <div id="mexicoTime">🕐 Hora México: --:--:--</div>
+            </div>
+
+            <div class="countdown-section">
+                <div>25 de Febrero en:</div>
+                <div class="countdown-values">
+                    <div class="countdown-item"><span id="countDays">0</span> días</div>
+                    <div class="countdown-item"><span id="countHours">0</span> horas</div>
+                    <div class="countdown-item"><span id="countMinutes">0</span> minutos</div>
+                    <div class="countdown-item"><span id="countSeconds">0</span> segundos</div>
+                </div>
+            </div>
+            
+            <div class="instruction">
+                <p>Arrastra las fotos</p>
+                <p>Clickea las frases</p>
+            </div>
+
+            <div class="phrases-section" id="phrasesSection">
+                <!-- Las frases se agregarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para frases expandidas -->
+    <div class="overlay" id="overlay"></div>
+    <div class="modal" id="modal">
+        <div class="modal-phrase" id="modalPhrase"></div>
+        <div class="modal-buttons">
+            <button class="btn btn-close" onclick="closeModal()">Cerrar</button>
+            <button class="btn btn-remove" onclick="removePhrase()">Quitar</button>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================
+        // CONFIGURACIÓN DE FRASES Y FOTOS
+        // =====================================================
+        const phrases = [
+            "Te amo más cada día",
+            "Eres mi galaxia favorita",
+            "Juntos somos infinito",
+            "Mi corazón es tuyo",
+            "Eres mi estrella polar",
+            "Contigo todo es magia"
+        ];
+
+        const photos = [
+            { url: "https://lh3.googleusercontent.com/u/0/d/1nSSyimXxyR-RRNssrHXf8jz_wkJvhbN_", id: "photo1" },
+            { url: "https://lh3.googleusercontent.com/u/0/d/1n4ClHxaz3qGU1nVM7DT4Ge4UakI-zUb9", id: "photo2" },
+            { url: "https://lh3.googleusercontent.com/u/0/d/1KgR9JwVueAt9uegrvH9lOxFZ_cl5iUqP", id: "photo3" }
+        ];
+
+        // =====================================================
+        // GALAXIA CON CANVAS
+        // =====================================================
+        const canvas = document.getElementById('galaxyCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Función para hacer el canvas responsive
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        let particles = [];
+        let mouseX = canvas.width / 2;
+        let mouseY = canvas.height / 2;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+                this.opacity = Math.random() * 0.5 + 0.3;
+                this.color = ['#ff69b4', '#ff1493', '#da70d6', '#ba55d3', '#ee82ee'][Math.floor(Math.random() * 5)];
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.02;
+            }
+
+            update() {
+                // Movimiento circular alrededor del mouse
+                const dx = mouseX - this.x;
+                const dy = mouseY - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 200) {
+                    const angle = Math.atan2(dy, dx);
+                    this.speedX += Math.cos(angle) * 0.1;
+                    this.speedY += Math.sin(angle) * 0.1;
+                }
+
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.rotation += this.rotationSpeed;
+
+                // Fricción
+                this.speedX *= 0.98;
+                this.speedY *= 0.98;
+
+                // Rebote en bordes
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+
+                this.x = Math.max(0, Math.min(canvas.width, this.x));
+                this.y = Math.max(0, Math.min(canvas.height, this.y));
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+
+                // Dibujar como una pequeña estrella
+                ctx.beginPath();
+                for (let i = 0; i < 5; i++) {
+                    const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+                    const x = Math.cos(angle) * this.size;
+                    const y = Math.sin(angle) * this.size;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        // Inicializar partículas
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 200; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateGalaxy() {
+            // Fondo oscuro con efecto de desvanecimiento
+            ctx.fillStyle = 'rgba(10, 14, 39, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Dibujar líneas de conexión
+            ctx.strokeStyle = 'rgba(255, 105, 180, 0.1)';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 100) {
+                        ctx.globalAlpha = 0.2 * (1 - distance / 100);
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                        ctx.globalAlpha = 1;
+                    }
+                }
+            }
+
+            // Actualizar y dibujar partículas
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animateGalaxy);
+        }
+
+        // =====================================================
+        // MANEJO DE FRASES
+        // =====================================================
+        let currentPhraseIndex = null;
+
+        function renderPhrases() {
+            const phrasesSection = document.getElementById('phrasesSection');
+            phrasesSection.innerHTML = '';
+
+            phrases.forEach((phrase, index) => {
+                const phraseItem = document.createElement('div');
+                phraseItem.className = 'phrase-item';
+                phraseItem.textContent = phrase;
+                phraseItem.dataset.index = index;
+                phraseItem.addEventListener('click', () => openModal(index));
+                phrasesSection.appendChild(phraseItem);
+            });
+        }
+
+        function openModal(index) {
+            currentPhraseIndex = index;
+            document.getElementById('modalPhrase').textContent = phrases[index];
+            document.getElementById('modal').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+            currentPhraseIndex = null;
+        }
+
+        function removePhrase() {
+            if (currentPhraseIndex !== null) {
+                phrases.splice(currentPhraseIndex, 1);
+                closeModal();
+                renderPhrases();
+            }
+        }
+
+        document.getElementById('overlay').addEventListener('click', closeModal);
+
+        // =====================================================
+        // MANEJO DE FOTOS
+        // =====================================================
+        function renderPhotos() {
+            const photosSection = document.getElementById('photosSection');
+            photosSection.innerHTML = '';
+
+            const positions = [
+                { top: '10%', left: '5%' },
+                { top: '70%', left: '10%' },
+                { top: '20%', right: '8%' }
+            ];
+
+            photos.forEach((photo, index) => {
+                const photoDiv = document.createElement('div');
+                photoDiv.className = 'photo';
+                photoDiv.id = photo.id;
+                
+                const pos = positions[index] || { top: Math.random() * 80 + '%', left: Math.random() * 80 + '%' };
+                Object.assign(photoDiv.style, pos);
+
+                photoDiv.innerHTML = `<img src="${photo.url}" alt="Foto ${index + 1}" onerror="this.parentElement.innerHTML = '<div class=\\'photo-placeholder\\'>Reemplaza esta URL con tu foto:<br>${photo.url.split('=')[1] || 'Foto'}</div>'">`;
+
+                photoDiv.addEventListener('mousedown', startDrag);
+                photosSection.appendChild(photoDiv);
+            });
+        }
+
+        // Sistema de arrastre
+        let draggedPhoto = null;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        function startDrag(e) {
+            draggedPhoto = e.currentTarget;
+            const rect = draggedPhoto.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            draggedPhoto.style.zIndex = 50;
+            document.addEventListener('mousemove', moveDrag);
+            document.addEventListener('mouseup', endDrag);
+        }
+
+        function moveDrag(e) {
+            if (draggedPhoto) {
+                draggedPhoto.style.left = e.clientX - offsetX + 'px';
+                draggedPhoto.style.top = e.clientY - offsetY + 'px';
+                draggedPhoto.style.right = 'auto';
+            }
+        }
+
+        function endDrag() {
+            if (draggedPhoto) {
+                draggedPhoto.style.zIndex = 'auto';
+                draggedPhoto = null;
+            }
+            document.removeEventListener('mousemove', moveDrag);
+            document.removeEventListener('mouseup', endDrag);
+        }
+
+        // =====================================================
+        // SEGUIMIENTO DEL MOUSE
+        // =====================================================
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // =====================================================
+        // RELOJ Y COUNTDOWN
+        // =====================================================
+        function updateMexicoTime() {
+            // Obtener hora actual de México (Zona horaria: America/Mexico_City)
+            const now = new Date();
+            const mexicoTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
+            
+            const hours = String(mexicoTime.getHours()).padStart(2, '0');
+            const minutes = String(mexicoTime.getMinutes()).padStart(2, '0');
+            const seconds = String(mexicoTime.getSeconds()).padStart(2, '0');
+            
+            document.getElementById('mexicoTime').textContent = `🕐 Hora México: ${hours}:${minutes}:${seconds}`;
+        }
+
+        function updateCountdown() {
+            // Calcular fecha objetivo: 25 de febrero 2025
+            const now = new Date();
+            let targetDate = new Date(now.getFullYear(), 1, 25); // Mes 1 = Febrero
+            
+            // Si ya pasó el 25 de febrero, contar al próximo año
+            if (now > targetDate) {
+                targetDate = new Date(now.getFullYear() + 1, 1, 25);
+            }
+            
+            // Convertir a hora de México
+            const mexicoNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
+            const mexicoTarget = new Date(targetDate.toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
+            
+            const diff = mexicoTarget - mexicoNow;
+            
+            if (diff > 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                document.getElementById('countDays').textContent = days;
+                document.getElementById('countHours').textContent = hours;
+                document.getElementById('countMinutes').textContent = minutes;
+                document.getElementById('countSeconds').textContent = seconds;
+            } else {
+                document.getElementById('countDays').textContent = '0';
+                document.getElementById('countHours').textContent = '0';
+                document.getElementById('countMinutes').textContent = '0';
+                document.getElementById('countSeconds').textContent = '0';
+            }
+        }
+
+        // Actualizar reloj y countdown cada segundo
+        setInterval(() => {
+            updateMexicoTime();
+            updateCountdown();
+        }, 1000);
+
+        // Actualizar al cargar la página
+        updateMexicoTime();
+        updateCountdown();
+
+        // =====================================================
+        // REDIMENSIONAMIENTO RESPONSIVE
+        // =====================================================
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // =====================================================
+        // INICIALIZACIÓN
+        // =====================================================
+        initParticles();
+        renderPhrases();
+        renderPhotos();
+        animateGalaxy();
+    </script>
+</body>
+</html>

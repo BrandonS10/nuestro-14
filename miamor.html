@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorpresas de Amor - San Valentín</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fff9f7 0%, #ffe4f0 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            color: #d4737e;
+            margin-bottom: 10px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            color: #b8a5aa;
+            font-size: 1.1rem;
+        }
+
+        .clock {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+            color: #d4737e;
+        }
+
+        .surprises-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .surprise-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(212, 115, 126, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .surprise-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(212, 115, 126, 0.2);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #f8d4e6 0%, #fce4ee 100%);
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .card-number {
+            font-size: 3rem;
+            color: #d4737e;
+            font-weight: 300;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: #d4737e;
+            font-weight: 500;
+        }
+
+        .card-phrase {
+            color: #b8869e;
+            font-size: 0.95rem;
+            margin-top: 10px;
+        }
+
+        .card-button {
+            background: linear-gradient(135deg, #d4737e 0%, #e8759e 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+
+        .card-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(212, 115, 126, 0.3);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 30px;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 40px;
+            position: relative;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #d4737e;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .modal-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .modal-title {
+            font-size: 2.5rem;
+            color: #d4737e;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        .modal-text {
+            font-size: 1.05rem;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        /* SVG Flores */
+        .flowers-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 60px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        svg {
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+        }
+
+        .bouquet-svg {
+            max-width: 100%;
+            height: auto;
+            animation: floatBouquet 3s ease-in-out infinite;
+        }
+
+        @keyframes floatBouquet {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotateZ(0deg);
+            }
+
+            25% {
+                transform: translateY(-8px) rotateZ(1deg);
+            }
+
+            50% {
+                transform: translateY(-5px) rotateZ(0deg);
+            }
+
+            75% {
+                transform: translateY(-8px) rotateZ(-1deg);
+            }
+        }
+
+        .bouquet-svg circle,
+        .bouquet-svg ellipse {
+            animation: petalGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes petalGlow {
+
+            0%,
+            100% {
+                filter: brightness(1) drop-shadow(0 2px 4px rgba(255, 105, 180, 0.2));
+            }
+
+            50% {
+                filter: brightness(1.1) drop-shadow(0 4px 8px rgba(255, 105, 180, 0.4));
+            }
+        }
+
+        /* Pizza SVG */
+        .pizza-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 40px 0;
+        }
+
+        .pizza-3d {
+            max-width: 100%;
+            height: auto;
+            animation: pizzaSpin 6s linear infinite;
+        }
+
+        .pineapple-base {
+            animation: pinaFloating 2s ease-in-out infinite;
+        }
+
+        .pineapple-leaves {
+            animation: leavesWave 3s ease-in-out infinite;
+        }
+
+        .pineapple-texture {
+            animation: textureShimmer 4s ease-in-out infinite;
+        }
+
+        @keyframes pizzaSpin {
+            0% {
+                transform: rotateZ(0deg) scale(1);
+            }
+
+            100% {
+                transform: rotateZ(360deg) scale(1);
+            }
+        }
+
+        @keyframes pinaFloating {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-6px);
+            }
+        }
+
+        @keyframes leavesWave {
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(3deg);
+            }
+
+            75% {
+                transform: rotate(-3deg);
+            }
+        }
+
+        @keyframes textureShimmer {
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        /* Fotos */
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .photo-box {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ffe4f0, #fff9f7);
+            border: 2px dashed #ffb3c1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d4737e;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .photo-box:hover {
+            background: linear-gradient(135deg, #ffd0e8, #ffe4f0);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ffb3d9;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 20px;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #d4737e;
+            box-shadow: 0 0 10px rgba(212, 115, 126, 0.3);
+        }
+
+        /* Responsive para Tablets */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header p {
+                font-size: 0.95rem;
+            }
+
+            .surprises-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .modal-content {
+                max-width: 95%;
+                padding: 25px 20px;
+                border-radius: 25px;
+            }
+
+            .modal-title {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+            }
+
+            .modal-text {
+                font-size: 1rem;
+                margin-bottom: 15px;
+            }
+
+            .flowers-container {
+                gap: 25px;
+            }
+
+            .card-number {
+                font-size: 2.5rem;
+            }
+
+            .card-title {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Responsive para Móviles Pequeños */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 12px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+                margin-bottom: 8px;
+            }
+
+            .header p {
+                font-size: 0.85rem;
+            }
+
+            .clock {
+                font-size: 0.95rem;
+                margin-bottom: 20px;
+            }
+
+            .surprises-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                margin-bottom: 30px;
+            }
+
+            .card-header {
+                padding: 20px 15px;
+            }
+
+            .card-number {
+                font-size: 2rem;
+            }
+
+            .card-title {
+                font-size: 1.1rem;
+            }
+
+            .card-phrase {
+                font-size: 0.85rem;
+                margin-top: 8px;
+            }
+
+            .card-button {
+                padding: 10px 25px;
+                font-size: 0.95rem;
+                margin-top: 10px;
+            }
+
+            .modal {
+                padding: 10px;
+            }
+
+            .modal-content {
+                max-width: 100%;
+                padding: 20px 15px;
+                max-height: 95vh;
+                border-radius: 20px;
+            }
+
+            .modal-close {
+                top: 15px;
+                right: 15px;
+                font-size: 1.5rem;
+            }
+
+            .modal-title {
+                font-size: 1.5rem;
+                margin-bottom: 12px;
+            }
+
+            .modal-text {
+                font-size: 0.95rem;
+                line-height: 1.6;
+                margin-bottom: 12px;
+            }
+
+            .text-input {
+                padding: 12px;
+                font-size: 0.95rem;
+                min-height: 80px;
+            }
+
+            /* Grid para imágenes en móvil */
+            .modal-content>div[style*="grid"] {
+                gap: 12px !important;
+            }
+
+            /* Flores container responsive */
+            .flowers-container {
+                gap: 15px;
+                margin: 20px 0;
+            }
+
+            svg {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+        /* Extra pequeño (menos de 320px) */
+        @media (max-width: 320px) {
+            .header h1 {
+                font-size: 1.2rem;
+            }
+
+            .modal-content {
+                padding: 15px 12px;
+            }
+
+            .modal-title {
+                font-size: 1.3rem;
+            }
+
+            .card-button {
+                padding: 8px 20px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Nuestro San Valentín</h1>
+            <p>Sorpresas de amor para ti</p>
+        </div>
+
+        <div class="clock" id="clock">
+            <div style="margin-bottom: 10px;">🕐 <span id="userClockTime">--:--:--</span> <span id="timezoneLabel"
+                    style="font-size: 0.8rem; color: #b8869e;">Zona horaria detectada</span></div>
+            <div style="font-size: 0.9rem; color: #d4737e; margin-bottom: 10px;">
+                14 de Febrero 2026 - Acceso: <span id="accessStatus" style="font-weight: 600; color: #d4737e;">1pm, 3pm,
+                    5pm</span>
+            </div>
+            <div id="countryNotif"
+                style="margin-top: 8px; padding: 8px 12px; border-radius: 8px; background: rgba(212, 115, 126, 0.1); font-size: 0.85rem; color: #d4737e; display: none;">
+                <span id="countryMessage">Cargando información...</span>
+            </div>
+        </div>
+
+        <div class="surprises-grid">
+            <div class="surprise-card" onclick="openModal('modal1')">
+                <div class="card-header">
+                    <div class="card-number">1</div>
+                    <div class="card-title">Mi Amor</div>
+                    <p class="card-phrase">"Eres la razón de mis sonrisas"</p>
+                </div>
+                <div style="padding: 20px; text-align: center;">
+                    <button class="card-button" style="cursor: pointer;">Ver Sorpresa</button>
+                </div>
+            </div>
+
+            <div class="surprise-card" onclick="openModal('modal2')">
+                <div class="card-header">
+                    <div class="card-number">2</div>
+                    <div class="card-title">Flores Hermosas</div>
+                    <p class="card-phrase">"Un recuerdo"</p>
+                </div>
+                <div style="padding: 20px; text-align: center;">
+                    <button class="card-button" style="cursor: pointer;">Ver Sorpresa</button>
+                </div>
+            </div>
+
+            <div class="surprise-card" onclick="openModal('modal3')">
+                <div class="card-header">
+                    <div class="card-number">3</div>
+                    <div class="card-title">Nuestro 25</div>
+                    <p class="card-phrase">"Pizza y Free Fire"</p>
+                </div>
+                <div style="padding: 20px; text-align: center;">
+                    <button class="card-button" style="cursor: pointer;">Ver Sorpresa</button>
+                </div>
+            </div>
+
+            <div class="surprise-card" onclick="openModal('modal4')">
+                <div class="card-header">
+                    <div class="card-number">4</div>
+                    <div class="card-title">Mi Novia</div>
+                    <p class="card-phrase">"La más hermosa"</p>
+                </div>
+                <div style="padding: 20px; text-align: center;">
+                    <button class="card-button" style="cursor: pointer;">Ver Sorpresa</button>
+                </div>
+            </div>
+
+            <div class="surprise-card" onclick="openModal('modal5')">
+                <div class="card-header">
+                    <div class="card-number">5</div>
+                    <div class="card-title">Nuestro Bebé</div>
+                    <p class="card-phrase">"Nuestro amor hecho realidad"</p>
+                </div>
+                <div style="padding: 20px; text-align: center;">
+                    <button class="card-button" style="cursor: pointer;">Ver Sorpresa</button>
+                </div>
+            </div>
+
+            <div class="surprise-card" onclick="openModal('modal6')">
+                <div class="card-header">
+                    <div class="card-number">6</div>
+                    <div class="card-title">Yo Para Ti</div>
+                    <p class="card-phrase">"Tu hombre enamorado"</p>
+                </div>
+                <div style="padding: 20px; text-align: center;">
+                    <button class="card-button" style="cursor: pointer;">Ver Sorpresa</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal 1: Mi Amor -->
+    <div class="modal" id="modal1">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal1')">✕</button>
+            <h2 class="modal-title">Mi Amor 💕</h2>
+            <p class="modal-text">
+                Hola mi amor, esta es la primera sorpresa las cuales son palabras, y cosas que quiero decirte mi bebe
+                hermosa, eres increible y no miento mi vida, llegaste a mi vida y me has hecho muy feliz, espero te
+                guste todo
+            </p>
+            <p class="modal-text">
+                Significas tanto para mi, mi amor hermosa, tener sueños y metas juntos e incluso hoy decidir llamar a
+                nuestro futuro hijo Yeshua, es hermoso compartir contigo cada momento, eres tan perfecta y mia mi amor
+            </p>
+            <p class="modal-text" style="font-weight: 600; color: #d4737e; font-size: 1.1rem;">
+                Mi mensaje de amor para ti:
+            </p>
+            <textarea class="text-input" id="personalMessage"
+                placeholder="Escribe tu corazón aquí...">Pasaran dias, meses, años, y mi vida siempre va a girar entorno a ti, me haces tan feliz mi vida:( lamento mucho mis comportamientos, espero estes conmigo siempre corazon, soy demasiado feliz a tu lado, y eres la persona que quiero para toda la vida, quiero casamre contigo mamiiii</textarea>
+            <p class="modal-text" style="text-align: center; font-style: italic; color: #d4737e; font-size: 1.1rem;">
+                "Te amo demasiado mi reinaaa" 💖
+            </p>
+        </div>
+    </div>
+
+    <!-- Modal 2: Ramo de Flores -->
+    <div class="modal" id="modal2">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal2')">✕</button>
+            <h2 class="modal-title">Ramo de Flores 🌹</h2>
+            <p class="modal-text">
+                Todavia recuerdo el ramo de flores que te di mi vida y fue muy hermoso, admito que no te he vuelto a
+                dar, pero cuando estemos juntos mi amor, nunca te faltaran, te amo demasiado, hoy se cumple un año de un
+                lindo recuerdo y espero me perdones
+
+            </p>
+
+            <!-- Espacios para imágenes del ramo -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0;">
+                <div style="width: 100%; aspect-ratio: 1; border-radius: 15px; background: url('fotos/ramo1.jpeg'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; border: 3px dashed #d4737e; cursor: pointer; transition: all 0.3s;"
+                    onclick="document.getElementById('flowerImg1').click()" onmouseover="this.style.opacity='0.8'"
+                    onmouseout="this.style.opacity='1'">
+                    <span
+                        style="text-align: center; color: #d4737e; font-size: 3rem; background: rgba(255,255,255,0.4); border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">📸</span>
+                    <input type="file" id="flowerImg1" style="display: none;" accept="image/*"
+                        onchange="loadImage(this, event)">
+                </div>
+
+                <div style="width: 100%; aspect-ratio: 1; border-radius: 15px; background: url('fotos/ramo2.jpeg'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; border: 3px dashed #d4737e; cursor: pointer; transition: all 0.3s;"
+                    onclick="document.getElementById('flowerImg2').click()" onmouseover="this.style.opacity='0.8'"
+                    onmouseout="this.style.opacity='1'">
+                    <span
+                        style="text-align: center; color: #d4737e; font-size: 3rem; background: rgba(255,255,255,0.4); border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">📸</span>
+                    <input type="file" id="flowerImg2" style="display: none;" accept="image/*"
+                        onchange="loadImage(this, event)">
+                </div>
+            </div>
+            <svg width="300" height="450" viewBox="0 0 300 450" class="bouquet-svg" style="display: none;">
+                <defs>
+                    <radialGradient id="petalGrad1">
+                        <stop offset="0%" style="stop-color:#ff3d9b;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#ff1493;stop-opacity:0.8" />
+                    </radialGradient>
+                    <radialGradient id="petalGrad2">
+                        <stop offset="0%" style="stop-color:#ff69b4;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#ff3d9b;stop-opacity:0.8" />
+                    </radialGradient>
+                    <radialGradient id="goldCenter">
+                        <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+                        <stop offset="70%" style="stop-color:#ffed4e;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#ffa500;stop-opacity:0.9" />
+                    </radialGradient>
+                </defs>
+
+                <!-- Tallos principales -->
+                <path d="M 150 200 Q 145 280 130 380" stroke="#2d5016" stroke-width="4" fill="none"
+                    stroke-linecap="round" />
+                <path d="M 150 200 Q 155 280 170 380" stroke="#2d5016" stroke-width="4" fill="none"
+                    stroke-linecap="round" />
+                <path d="M 150 200 Q 140 260 120 340" stroke="#3d6b1f" stroke-width="3" fill="none"
+                    stroke-linecap="round" />
+                <path d="M 150 200 Q 160 260 180 340" stroke="#3d6b1f" stroke-width="3" fill="none"
+                    stroke-linecap="round" />
+
+                <!-- Hojas verdes grandes -->
+                <ellipse cx="90" cy="300" rx="15" ry="60" fill="#4a7c2c" opacity="0.8" transform="rotate(-35 90 300)" />
+                <ellipse cx="210" cy="310" rx="15" ry="60" fill="#5a8c3c" opacity="0.8"
+                    transform="rotate(35 210 310)" />
+                <ellipse cx="110" cy="350" rx="12" ry="50" fill="#3d6b1f" opacity="0.7"
+                    transform="rotate(-25 110 350)" />
+                <ellipse cx="190" cy="360" rx="12" ry="50" fill="#4a7c2c" opacity="0.7"
+                    transform="rotate(25 190 360)" />
+
+                <!-- GERBERA 1 - IZQUIERDA (Grande, Rosa Profundo) -->
+                <!-- Pétalos traseros (fondo) -->
+                <ellipse cx="120" cy="50" rx="25" ry="45" fill="url(#petalGrad1)" opacity="0.7"
+                    transform="rotate(-45 120 80)" />
+                <ellipse cx="180" cy="50" rx="25" ry="45" fill="url(#petalGrad1)" opacity="0.7"
+                    transform="rotate(45 180 80)" />
+                <ellipse cx="100" cy="100" rx="25" ry="45" fill="url(#petalGrad1)" opacity="0.7"
+                    transform="rotate(-90 100 100)" />
+                <ellipse cx="200" cy="100" rx="25" ry="45" fill="url(#petalGrad1)" opacity="0.7"
+                    transform="rotate(90 200 100)" />
+
+                <!-- Pétalos intermedios -->
+                <ellipse cx="120" cy="40" rx="22" ry="42" fill="url(#petalGrad2)" opacity="0.85"
+                    transform="rotate(-40 120 75)" />
+                <ellipse cx="180" cy="40" rx="22" ry="42" fill="url(#petalGrad2)" opacity="0.85"
+                    transform="rotate(40 180 75)" />
+                <ellipse cx="105" cy="90" rx="22" ry="42" fill="url(#petalGrad2)" opacity="0.85"
+                    transform="rotate(-85 105 90)" />
+                <ellipse cx="195" cy="90" rx="22" ry="42" fill="url(#petalGrad2)" opacity="0.85"
+                    transform="rotate(85 195 90)" />
+                <ellipse cx="140" cy="30" rx="22" ry="42" fill="url(#petalGrad2)" opacity="0.85" />
+                <ellipse cx="160" cy="30" rx="22" ry="42" fill="url(#petalGrad2)" opacity="0.85" />
+
+                <!-- Pétalos delanteros (frente) -->
+                <ellipse cx="120" cy="45" rx="20" ry="40" fill="#ff1493" opacity="0.95"
+                    transform="rotate(-35 120 80)" />
+                <ellipse cx="180" cy="45" rx="20" ry="40" fill="#ff3d9b" opacity="0.95" transform="rotate(35 180 80)" />
+                <ellipse cx="100" cy="95" rx="20" ry="40" fill="#ff1493" opacity="0.95"
+                    transform="rotate(-85 100 95)" />
+                <ellipse cx="200" cy="95" rx="20" ry="40" fill="#ff3d9b" opacity="0.95" transform="rotate(85 200 95)" />
+                <ellipse cx="140" cy="35" rx="20" ry="40" fill="#ff1493" opacity="0.95" />
+                <ellipse cx="160" cy="35" rx="20" ry="40" fill="#ff3d9b" opacity="0.95" />
+                <ellipse cx="150" cy="120" rx="20" ry="40" fill="#ff1493" opacity="0.95"
+                    transform="rotate(180 150 120)" />
+
+                <!-- Centro gerbera 1 -->
+                <circle cx="150" cy="80" r="22" fill="url(#goldCenter)" />
+                <circle cx="150" cy="80" r="20" fill="#ffeb3b" opacity="0.6" />
+
+                <!-- GERBERA 2 - DERECHA (Grande, Rosa Claro) -->
+                <!-- Pétalos traseros -->
+                <ellipse cx="220" cy="100" rx="24" ry="43" fill="url(#petalGrad2)" opacity="0.7"
+                    transform="rotate(-50 220 135)" />
+                <ellipse cx="280" cy="100" rx="24" ry="43" fill="url(#petalGrad2)" opacity="0.7"
+                    transform="rotate(50 280 135)" />
+                <ellipse cx="200" cy="150" rx="24" ry="43" fill="url(#petalGrad2)" opacity="0.7"
+                    transform="rotate(-95 200 150)" />
+                <ellipse cx="300" cy="150" rx="24" ry="43" fill="url(#petalGrad2)" opacity="0.7"
+                    transform="rotate(95 300 150)" />
+
+                <!-- Pétalos intermedios -->
+                <ellipse cx="220" cy="90" rx="21" ry="40" fill="#ff69b4" opacity="0.85"
+                    transform="rotate(-45 220 130)" />
+                <ellipse cx="280" cy="90" rx="21" ry="40" fill="#ff85c1" opacity="0.85"
+                    transform="rotate(45 280 130)" />
+                <ellipse cx="205" cy="140" rx="21" ry="40" fill="#ff69b4" opacity="0.85"
+                    transform="rotate(-90 205 140)" />
+                <ellipse cx="295" cy="140" rx="21" ry="40" fill="#ff85c1" opacity="0.85"
+                    transform="rotate(90 295 140)" />
+                <ellipse cx="240" cy="80" rx="21" ry="40" fill="#ff69b4" opacity="0.85" />
+                <ellipse cx="260" cy="80" rx="21" ry="40" fill="#ff85c1" opacity="0.85" />
+
+                <!-- Pétalos delanteros -->
+                <ellipse cx="220" cy="95" rx="19" ry="38" fill="#ff69b4" opacity="0.98"
+                    transform="rotate(-40 220 135)" />
+                <ellipse cx="280" cy="95" rx="19" ry="38" fill="#ff85c1" opacity="0.98"
+                    transform="rotate(40 280 135)" />
+                <ellipse cx="210" cy="145" rx="19" ry="38" fill="#ff69b4" opacity="0.98"
+                    transform="rotate(-88 210 145)" />
+                <ellipse cx="290" cy="145" rx="19" ry="38" fill="#ff85c1" opacity="0.98"
+                    transform="rotate(88 290 145)" />
+                <ellipse cx="240" cy="85" rx="19" ry="38" fill="#ff69b4" opacity="0.98" />
+                <ellipse cx="260" cy="85" rx="19" ry="38" fill="#ff85c1" opacity="0.98" />
+                <ellipse cx="250" cy="160" rx="19" ry="38" fill="#ff69b4" opacity="0.98"
+                    transform="rotate(180 250 160)" />
+
+                <!-- Centro gerbera 2 -->
+                <circle cx="250" cy="120" r="21" fill="url(#goldCenter)" />
+                <circle cx="250" cy="120" r="19" fill="#ffeb3b" opacity="0.6" />
+
+                <!-- Flores pequeñas complementarias (gypsophila) -->
+                <circle cx="70" cy="150" r="3.5" fill="#ffb3d9" />
+                <circle cx="90" cy="140" r="3" fill="#ff85c1" />
+                <circle cx="60" cy="170" r="3.5" fill="#ffb3d9" />
+                <circle cx="110" cy="180" r="3" fill="#ff85c1" />
+                <circle cx="230" cy="180" r="3.5" fill="#ffb3d9" />
+                <circle cx="270" cy="200" r="3" fill="#ff85c1" />
+                <circle cx="210" cy="220" r="3.5" fill="#ffb3d9" />
+                <circle cx="260" cy="240" r="3" fill="#ff85c1" />
+            </svg>
+
+            <p class="modal-text"
+                style="text-align: center; font-style: italic; color: #d4737e; font-size: 1.1rem; margin-top: 30px;">
+                "Las flores se desvanecen, pero mi amor por ti es eterno" 💐
+            </p>
+        </div>
+    </div>
+
+    <!-- Modal 3: Cena y Besos del 25 -->
+    <div class="modal" id="modal3">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal3')">✕</button>
+            <h2 class="modal-title">25 de Febrero 🍕</h2>
+            <p class="modal-text">
+                Sera una noche especial, comeras pizza, espero te guste todo mi amor, la pasaremos juntitos shiii
+            </p>
+
+            <!-- PIZZA IMAGEN -->
+            <div id="dropzone"
+                style="width: 100%; max-width: 350px; aspect-ratio: 1; border-radius: 15px; background: linear-gradient(135deg, #ffe4f0, #fff9f7); display: flex; align-items: center; justify-content: center; border: 3px dashed #d4737e; cursor: pointer; margin: 25px auto; overflow: hidden; position: relative;"
+                onclick="document.getElementById('pizzaImg').click()">
+
+                <span id="placeholderIcon"
+                    style="text-align: center; color: #d4737e; font-size: 4rem; position: absolute;">🍕</span>
+
+                <img id="preview" src="fotos/pizza.png"
+                    style="width: 100%; height: 100%; object-fit: cover; display: block; z-index: 2;"
+                    onload="document.getElementById('placeholderIcon').style.display='none';"
+                    onerror="this.style.display='none'; document.getElementById('placeholderIcon').style.display='block';">
+
+                <input type="file" id="pizzaImg" style="display: none;" accept="image/*"
+                    onchange="loadImage(this, event)">
+            </div>
+
+            <!-- FREE FIRE SECTION -->
+            <p class="modal-text"
+                style="text-align: center; font-weight: 600; color: #d4737e; margin: 25px 0; font-size: 1.1rem;">
+                ✨ ¡Juntos en Free Fire! ✨
+            </p>
+            <p class="modal-text" style="text-align: center; margin-bottom: 25px;">
+                Además de pizza, jugaremos free juntos. Fotos lindas de mi nv y yo:
+            </p>
+
+            <!-- 3 IMAGENES DE JUEGO (FF) -->
+            <div
+                style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 25px; width: 100%;">
+
+                <div style="width: 100%; aspect-ratio: 1; border-radius: 12px; background: linear-gradient(135deg, #ffe4f0, #fff9f7); display: flex; align-items: center; justify-content: center; border: 2px dashed #d4737e; cursor: pointer; transition: all 0.3s; overflow: hidden; position: relative;"
+                    onclick="document.getElementById('gameImg1').click()">
+                    <span id="icon1"
+                        style="text-align: center; color: #d4737e; font-size: 2.5rem; position: absolute;">🎮</span>
+                    <img src="fotos/ff1.jpeg" style="width: 100%; height: 100%; object-fit: cover; z-index: 2;"
+                        onload="document.getElementById('icon1').style.display='none';"
+                        onerror="this.style.display='none';">
+                    <input type="file" id="gameImg1" style="display: none;" accept="image/*"
+                        onchange="loadImage(this, event)">
+                </div>
+
+                <div style="width: 100%; aspect-ratio: 1; border-radius: 12px; background: linear-gradient(135deg, #ffe4f0, #fff9f7); display: flex; align-items: center; justify-content: center; border: 2px dashed #d4737e; cursor: pointer; transition: all 0.3s; overflow: hidden; position: relative;"
+                    onclick="document.getElementById('gameImg2').click()">
+                    <span id="icon2"
+                        style="text-align: center; color: #d4737e; font-size: 2.5rem; position: absolute;">🎮</span>
+                    <img src="fotos/ff2.jpeg" style="width: 100%; height: 100%; object-fit: cover; z-index: 2;"
+                        onload="document.getElementById('icon2').style.display='none';"
+                        onerror="this.style.display='none';">
+                    <input type="file" id="gameImg2" style="display: none;" accept="image/*"
+                        onchange="loadImage(this, event)">
+                </div>
+
+                <div style="width: 100%; aspect-ratio: 1; border-radius: 12px; background: linear-gradient(135deg, #ffe4f0, #fff9f7); display: flex; align-items: center; justify-content: center; border: 2px dashed #d4737e; cursor: pointer; transition: all 0.3s; overflow: hidden; position: relative;"
+                    onclick="document.getElementById('gameImg3').click()">
+                    <span id="icon3"
+                        style="text-align: center; color: #d4737e; font-size: 2.5rem; position: absolute;">🎮</span>
+                    <img src="fotos/ff3.jpeg" style="width: 100%; height: 100%; object-fit: cover; z-index: 2;"
+                        onload="document.getElementById('icon3').style.display='none';"
+                        onerror="this.style.display='none';">
+                    <input type="file" id="gameImg3" style="display: none;" accept="image/*"
+                        onchange="loadImage(this, event)">
+                </div>
+
+            </div>
+
+            <p class="modal-text" style="text-align: center; font-size: 1.8rem; margin: 25px 0;">
+                💋 💋 💋
+            </p>
+
+            <p class="modal-text" style="text-align: center; font-weight: 600;">
+                Solo quiero casarme contigo💕
+            </p>
+        </div>
+    </div>
+
+    <!-- Modal 4: Mi Novia -->
+    <div class="modal" id="modal4">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal4')">✕</button>
+            <h2 class="modal-title">Mi Novia Hermosa 👸</h2>
+            <p class="modal-text">
+                Ella es el amor de mi vidaaa
+            </p>
+            <!-- Foto de la novia -->
+            <div id="dropzone4"
+                style="width: 100%; max-width: 350px; aspect-ratio: 1; border-radius: 15px; background: linear-gradient(135deg, #ffe4f0, #fff9f7); display: flex; align-items: center; justify-content: center; border: 3px dashed #d4737e; cursor: pointer; margin: 25px auto; overflow: hidden; position: relative;"
+                onclick="document.getElementById('gfImg').click()">
+
+                <span id="gfIcon"
+                    style="text-align: center; color: #d4737e; font-size: 4rem; position: absolute;">💕</span>
+
+                <img id="gfPreview" src="fotos/minv.png"
+                    style="width: 100%; height: 100%; object-fit: cover; display: block; z-index: 2;"
+                    onload="document.getElementById('gfIcon').style.display='none';"
+                    onerror="this.style.display='none'; document.getElementById('gfIcon').style.display='block';">
+
+                <input type="file" id="gfImg" style="display: none;" accept="image/*" onchange="loadImage(this, event)">
+            </div>
+
+            <p class="modal-text"
+                style="text-align: center; font-style: italic; color: #d4737e; font-size: 1.1rem; margin-top: 30px;">
+                "Eres mi razón de vivir, mi amor eterno" 💖
+            </p>
+        </div>
+    </div>
+
+    <!-- Modal 5: Nuestro Bebé -->
+    <div class="modal" id="modal5">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal5')">✕</button>
+            <h2 class="modal-title">Nuestro Pequeño Yeshua 👶</h2>
+            <p class="modal-text">
+                Esta es una foto de nuestro bebe, que la verdad no sabemos lo lindo que sera, pero sera nuestro lindo
+                bebe
+            </p>
+            <p class="modal-text">
+                El sera todo nuestro mundo mi amor
+            </p>
+
+            <!-- Foto del bebé -->
+            <div id="dropzone5"
+                style="width: 100%; max-width: 350px; aspect-ratio: 1; border-radius: 15px; background: linear-gradient(135deg, #ffe4f0, #fff9f7); display: flex; align-items: center; justify-content: center; border: 3px dashed #d4737e; cursor: pointer; margin: 25px auto; overflow: hidden; position: relative;"
+                onclick="document.getElementById('babyImg').click()">
+
+                <span id="babyIcon"
+                    style="text-align: center; color: #d4737e; font-size: 4rem; position: absolute;">👼</span>
+
+                <img id="babyPreview" src="fotos/yoshua.png"
+                    style="width: 100%; height: 100%; object-fit: cover; display: block; z-index: 2;"
+                    onload="document.getElementById('babyIcon').style.display='none';"
+                    onerror="this.style.display='none'; document.getElementById('babyIcon').style.display='block';">
+
+                <input type="file" id="babyImg" style="display: none;" accept="image/*"
+                    onchange="loadImage(this, event)">
+            </div>
+
+            <p class="modal-text"
+                style="text-align: center; font-weight: 600; color: #d4737e; font-size: 1.1rem; margin: 25px 0;">
+                Lo esperaremos con ansias
+            </p>
+        </div>
+    </div>
+
+    <!-- Modal 6: Yo Para Ti -->
+    <div class="modal" id="modal6">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal6')">✕</button>
+            <h2 class="modal-title">Tu Amor 💑</h2>
+            <p class="modal-text">
+                Una foto mia con lo unico que deseo, que seas mi esposa para toda la vida
+            </p>
+            <p class="modal-text">
+                Prometo cuidarte, amarte y hacer que seas la mujer más feliz del mundo, eres lo mas hermoso que tengo mi preciosa mujer
+            </p>
+
+            <!-- Foto del novio -->
+            <div id="dropzone6"
+                style="width: 100%; max-width: 350px; aspect-ratio: 1; border-radius: 15px; background: linear-gradient(135deg, #ffe4f0, #fff9f7); display: flex; align-items: center; justify-content: center; border: 3px dashed #d4737e; cursor: pointer; margin: 25px auto; overflow: hidden; position: relative;"
+                onclick="document.getElementById('meImg').click()">
+
+                <span id="meIcon"
+                    style="text-align: center; color: #d4737e; font-size: 4rem; position: absolute;">😍</span>
+
+                <img id="mePreview" src="fotos/yo.png"
+                    style="width: 100%; height: 100%; object-fit: cover; display: block; z-index: 2;"
+                    onload="document.getElementById('meIcon').style.display='none';"
+                    onerror="this.style.display='none'; document.getElementById('meIcon').style.display='block';">
+
+                <input type="file" id="meImg" style="display: none;" accept="image/*" onchange="loadImage(this, event)">
+            </div>
+
+            <p class="modal-text"
+                style="text-align: center; font-weight: 600; color: #d4737e; font-size: 1.1rem; margin: 25px 0;">
+                Este es el hombre que te ama infinitamente
+            </p>
+
+            <p class="modal-text" style="text-align: center; font-style: italic; color: #d4737e; margin-top: 20px;">
+                "Te amo con toda mi alma, mi reina" 👑💕
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // ===== VALIDACIÓN DE ZONA HORARIA Y PAÍS =====
+
+        // Mapping de timezones a país (base reducida, la más importante es Venezuela)
+        const timezoneToCountry = {
+            'America/Venezuela': 'VE',
+            'America/Caracas': 'VE',
+            'America/Mexico_City': 'MX',
+            'America/New_York': 'US',
+            'America/Chicago': 'US',
+            'America/Denver': 'US',
+            'America/Los_Angeles': 'US',
+            'Europe/London': 'GB',
+            'Europe/Paris': 'FR',
+            'Europe/Madrid': 'ES',
+            'America/Argentina/Buenos_Aires': 'AR',
+            'America/Bogota': 'CO',
+            'America/Lima': 'PE',
+            'America/Santiago': 'CL',
+            'America/Toronto': 'CA',
+            'Europe/Berlin': 'DE',
+            'Europe/Rome': 'IT',
+            'Asia/Tokyo': 'JP',
+            'Asia/Shanghai': 'CN',
+            'Australia/Sydney': 'AU',
+        };
+
+        let userTimezone = 'UTC';
+        let userCountry = 'UNKNOWN';
+        let isVenezuela = false;
+        let userLocalTime = null;
+
+        // Detectar zona horaria del usuario
+        function detectTimezone() {
+            // Intenta obtener la zona horaria del navegador
+            if (Intl && Intl.DateTimeFormat) {
+                userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            }
+
+            // Obtener país desde timezone
+            userCountry = timezoneToCountry[userTimezone] || 'UNKNOWN';
+            isVenezuela = userCountry === 'VE';
+
+            return { timezone: userTimezone, country: userCountry };
+        }
+
+        // Verificar si puede acceder a las sorpresas
+        function canAccessSurprises() {
+            const now = new Date();
+
+            // Usuarios de Venezuela: acceso completo en cualquier momento
+            if (isVenezuela) {
+                return { canOpen: true, reason: 'Venezuela - Acceso Completo' };
+            }
+
+            // Obtener hora local en la zona horaria del usuario
+            const userTime = new Date(now.toLocaleString('en-US', { timeZone: userTimezone }));
+            const userHour = userTime.getHours();
+            const userDate = userTime.getDate();
+            const userMonth = userTime.getMonth();
+
+            // Validar que sea 14 de febrero (mes 1 = febrero)
+            if (userMonth !== 1 || userDate !== 14) {
+                return {
+                    canOpen: false,
+                    reason: `Solo el 14 de Febrero (Hoy es ${userDate}/${userMonth + 1})`,
+                    nextDate: '14/02/2026'
+                };
+            }
+
+            // Validar que sea 1pm (13), 3pm (15) o 5pm (17)
+            const allowedHours = [13, 15, 17];
+            if (allowedHours.includes(userHour)) {
+                return { canOpen: true, reason: `¡Sorpresa desbloqueada a las ${userHour}:00!` };
+            }
+
+            // Calcular próxima hora disponible
+            let nextHour = allowedHours.find(h => h > userHour);
+            if (!nextHour) {
+                return {
+                    canOpen: false,
+                    reason: `Próxima sorpresa mañana a las 1:00 PM`,
+                    nextTime: '1:00 PM (14:02)'
+                };
+            }
+
+            return {
+                canOpen: false,
+                reason: `Próxima sorpresa a las ${nextHour}:00 (en ${nextHour - userHour} horas)`,
+                nextHour: nextHour
+            };
+        }
+
+        // Actualizar interfaz según permisos
+        function updateAccessStatus() {
+            const status = canAccessSurprises();
+            const statusEl = document.getElementById('accessStatus');
+            const countryEl = document.getElementById('countryNotif');
+            const countryMsg = document.getElementById('countryMessage');
+
+            if (status.canOpen) {
+                statusEl.style.color = '#4CAF50';
+                statusEl.textContent = status.reason;
+                countryEl.style.background = 'rgba(76, 175, 80, 0.1)';
+                countryEl.style.color = '#4CAF50';
+                countryMsg.textContent = '✓ Las sorpresas están disponibles ahora';
+            } else {
+                statusEl.style.color = '#d4737e';
+                statusEl.textContent = status.reason;
+                countryEl.style.display = 'block';
+                countryMsg.textContent = `⏰ ${status.reason}`;
+            }
+
+            // Mostrar país y zona horaria
+            if (!isVenezuela) {
+                countryEl.style.display = 'block';
+                countryMsg.textContent = `${countryMsg.textContent} | Zona: ${userTimezone}`;
+            } else {
+                countryEl.style.display = 'block';
+                countryEl.style.background = 'rgba(212, 115, 126, 0.2)';
+                countryMsg.textContent = '🇻🇪 Venezuela - ¡Acceso Completo a Todas las Sorpresas!';
+            }
+        }
+
+        // Validar acceso al abrir modal
+        function openModal(id) {
+            const status = canAccessSurprises();
+
+            if (!status.canOpen) {
+                // Mostrar alerta
+                const message = `⏰ Las sorpresas están bloqueadas por zona horaria.\n\n${status.reason}`;
+                alert(message);
+                return false;
+            }
+
+            // Permitir abrir
+            document.getElementById(id).classList.add('active');
+            return true;
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function loadImage(input, event) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const parent = input.parentElement;
+                    parent.style.background = `url('${e.target.result}')`;
+                    parent.style.backgroundSize = 'cover';
+                    parent.style.backgroundPosition = 'center';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Actualizar reloj con zona horaria del usuario
+        function updateUserTime() {
+            const now = new Date();
+            const userTime = new Date(now.toLocaleString('en-US', { timeZone: userTimezone }));
+
+            const hours = String(userTime.getHours()).padStart(2, '0');
+            const minutes = String(userTime.getMinutes()).padStart(2, '0');
+            const seconds = String(userTime.getSeconds()).padStart(2, '0');
+
+            document.getElementById('userClockTime').textContent = `${hours}:${minutes}:${seconds}`;
+
+            // Actualizar estado de acceso cada minuto
+            if (userTime.getSeconds() === 0) {
+                updateAccessStatus();
+            }
+        }
+
+        // Inicialización
+        function init() {
+            detectTimezone();
+            updateUserTime();
+            updateAccessStatus();
+
+            // Actualizar cada segundo
+            setInterval(updateUserTime, 1000);
+
+            // Cerrar modal al hacer clic fuera
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModal(modal.id);
+                    }
+                });
+            });
+        }
+
+        // Ejecutar cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+
+</html>

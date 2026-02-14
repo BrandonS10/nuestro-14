@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxia de Amor, Brandito Papasito Rico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0015 0%, #1a0033 50%, #0a0015 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .header,
+        .footer {
+            display: none;
+        }
+
+        .rotating-phrases {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .phrase-item {
+            position: absolute;
+            color: rgba(255, 192, 203, 0.6);
+            font-size: clamp(0.7rem, 1.5vw, 1rem);
+            font-weight: 300;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            transform: translate(-50%, -50%);
+            text-shadow: 0 0 10px rgba(255, 192, 203, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .phrase-item {
+                font-size: 0.65rem;
+                letter-spacing: 0.5px;
+            }
+        }
+
+        .twinkle-star {
+            position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+        }
+
+        .star-small {
+            width: 1px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 2px rgba(255, 255, 255, 0.6);
+        }
+
+        .star-medium {
+            width: 1.5px;
+            height: 1.5px;
+            background: white;
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+        }
+
+        .star-large {
+            width: 2px;
+            height: 2px;
+            background: white;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.9), 0 0 15px rgba(255, 192, 203, 0.4);
+        }
+
+        .twinkle-star {
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        .twinkle-star:nth-child(2n) {
+            animation: twinkle 2.5s ease-in-out infinite;
+        }
+
+        .twinkle-star:nth-child(3n) {
+            animation: twinkle 4s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0% {
+                opacity: 0.2;
+                filter: brightness(0.8);
+            }
+
+            50% {
+                opacity: 1;
+                filter: brightness(1.2);
+            }
+
+            100% {
+                opacity: 0.2;
+                filter: brightness(0.8);
+            }
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            pointer-events: none;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(180, 20, 100, 0.95) 0%, rgba(100, 20, 140, 0.95) 100%);
+            border: 2px solid rgba(255, 105, 180, 0.6);
+            border-radius: clamp(20px, 5vw, 30px);
+            padding: clamp(1.5rem, 5vw, 3rem);
+            max-width: 95%;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            box-shadow:
+                0 0 40px rgba(255, 105, 180, 0.4),
+                0 0 80px rgba(199, 21, 133, 0.2),
+                inset 0 0 30px rgba(255, 105, 180, 0.1);
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.85) translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-emoji {
+            font-size: clamp(2rem, 8vw, 4rem);
+            margin-bottom: clamp(0.5rem, 2vw, 1rem);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .modal-phrase {
+            font-size: clamp(1.2rem, 4vw, 2.5rem);
+            color: rgba(255, 220, 240, 0.95);
+            margin-bottom: clamp(1rem, 3vw, 2rem);
+            line-height: 1.6;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: clamp(0.5rem, 2vw, 1rem);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .modal-btn {
+            padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 3vw, 2rem);
+            border: none;
+            border-radius: 25px;
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .btn-close {
+            background: linear-gradient(135deg, #ff1493, #ff69b4);
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 20, 147, 0.4);
+        }
+
+        .btn-close:hover,
+        .btn-close:active {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(255, 20, 147, 0.8);
+        }
+
+        .btn-delete {
+            background: rgba(255, 100, 150, 0.3);
+            color: rgba(255, 220, 240, 0.8);
+            border: 1px solid rgba(255, 100, 150, 0.5);
+        }
+
+        .btn-delete:hover,
+        .btn-delete:active {
+            background: rgba(255, 100, 150, 0.5);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-valentine {
+            background: linear-gradient(135deg, #ff1493, #ff69b4);
+            color: white;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: clamp(0.75rem, 3vw, 1.5rem) clamp(1.5rem, 5vw, 3rem);
+            border-radius: 50px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.6), 0 0 60px rgba(255, 105, 180, 0.3);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            pointer-events: auto;
+            white-space: nowrap;
+        }
+
+        .btn-valentine:hover,
+        .btn-valentine:active {
+            transform: translate(-50%, -50%) scale(1.12);
+            box-shadow: 0 0 50px rgba(255, 105, 180, 0.9), 0 0 100px rgba(255, 105, 180, 0.5);
+        }
+
+        .btn-valentine:active {
+            transform: translate(-50%, -50%) scale(0.98);
+        }
+
+        .page-transition {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 0, 21, 0.9);
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .page-transition.active {
+            opacity: 1;
+        }
+
+        .controls-info {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: rgba(255, 192, 203, 0.6);
+            font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 50;
+            background: rgba(10, 0, 21, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 105, 180, 0.2);
+        }
+
+        .controls-info.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 480px) {
+            .btn-valentine {
+                letter-spacing: 1px;
+            }
+
+            .modal-content {
+                max-height: 85vh;
+            }
+
+            .phrase-item {
+                display: none;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .btn-valentine:active {
+                transform: translate(-50%, -50%) scale(1.08);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="galaxyCanvas"></canvas>
+
+    <div class="rotating-phrases" id="phraseContainer"></div>
+    <div id="starField"></div>
+
+    <div class="modal" id="phraseModal">
+        <div class="modal-content">
+            <div class="modal-emoji">💖</div>
+            <div class="modal-phrase" id="phraseText"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn btn-close" onclick="closeModal()">Cerrar</button>
+                <button class="modal-btn btn-delete" onclick="removePhrase()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-transition" id="pageTransition"></div>
+    <button class="btn-valentine" id="valentineBtn" onclick="goToValentine()">💝 Ver San Valentín</button>
+
+    <script>
+        // Configuración
+        const canvas = document.getElementById('galaxyCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Redimensionar canvas
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Datos de frases y fotos
+        const PHRASES = [
+            '💕 Te amo mi amor',
+            '✨ Eres hermosa mamasita linda',
+            '🌹 Mi amor todita mia',
+            '🌙 Te quiero demasiado',
+            '💫 Infinito y mas alla',
+            '💖 Siempre contigo mi vida',
+            '💝 Ven y hacemos a Yeshua',
+            '✨ Solo tu y yo',
+            '🌹 Mi vida preciosa',
+            '💕 Eternamente tuyo',
+            '✨ Te adoro mamasita',
+            '💫 Contigo siempre',
+        ];
+
+        const ROTATING_PHRASES = [
+            'Te amo',
+            'Mi amor',
+            'Eres todo',
+            'Infinito tú',
+            'Siempre',
+            'Contigo',
+            'Alma mía',
+            'Mi dicha',
+        ];
+
+        const PHOTOS = [
+            'https://lh3.googleusercontent.com/u/0/d/1KgR9JwVueAt9uegrvH9lOxFZ_cl5iUqP',
+            'https://lh3.googleusercontent.com/u/0/d/1n4ClHxaz3qGU1nVM7DT4Ge4UakI-zUb9',
+            'https://lh3.googleusercontent.com/u/0/d/1nSSyimXxyR-RRNssrHXf8jz_wkJvhbN_'
+        ];
+
+        // Estado
+        let frameCount = 0;
+        let rotation = { x: 0, y: 0 };
+        let mouse = { x: 0, y: 0, pressed: false };
+        let camera = { z: 150 };
+        let objects = [];
+
+        // Clase para objetos flotantes
+        class FloatingObject {
+            constructor(id, type, content, angle, radiusXY, radiusZ) {
+                this.id = id;
+                this.type = type;
+                this.content = content;
+
+                this.x = Math.cos(angle) * radiusXY;
+                this.y = Math.sin(angle) * radiusXY;
+                this.z = Math.sin(angle * 0.5) * radiusZ;
+
+                this.vx = Math.cos(angle + Math.PI / 2) * 0.2;
+                this.vy = Math.sin(angle + Math.PI / 2) * 0.2;
+                this.vz = (Math.random() - 0.5) * 0.1;
+
+                this.size = type === 'phrase' ? 8 : 12;
+                this.rotation = Math.random() * Math.PI * 2;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.z += this.vz;
+                this.rotation += 0.02;
+
+                const distance = Math.sqrt(this.x ** 2 + this.y ** 2);
+                const angle = Math.atan2(this.y, this.x) + 0.001;
+
+                this.x = Math.cos(angle) * distance;
+                this.y = Math.sin(angle) * distance;
+
+                if (distance > 130) {
+                    this.vx *= -0.7;
+                    this.vy *= -0.7;
+                }
+            }
+
+            project(centerX, centerY) {
+                const scale = (camera.z + this.z) / camera.z;
+                const screenX = centerX + this.x * scale * (canvas.width / 280);
+                const screenY = centerY + this.y * scale * (canvas.height / 280);
+                const projSize = this.size * scale;
+
+                return { screenX, screenY, scale, projSize, depth: this.z };
+            }
+
+            draw(ctx, projection) {
+                if (this.type === 'phrase') {
+                    this.drawOrb(ctx, projection);
+                } else {
+                    this.drawPhotoFrame(ctx, projection);
+                }
+            }
+
+            drawOrb(ctx, proj) {
+                const { screenX, screenY, scale, projSize } = proj;
+
+                // Glow exterior
+                const glowGradient = ctx.createRadialGradient(
+                    screenX, screenY, 0,
+                    screenX, screenY, projSize * 2.5
+                );
+                glowGradient.addColorStop(0, `rgba(255, 105, 180, ${0.3 * scale})`);
+                glowGradient.addColorStop(0.5, `rgba(255, 105, 180, ${0.1 * scale})`);
+                glowGradient.addColorStop(1, 'rgba(255, 105, 180, 0)');
+
+                ctx.fillStyle = glowGradient;
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, projSize * 2.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Orbe principal
+                const orbGradient = ctx.createRadialGradient(
+                    screenX - projSize * 0.3, screenY - projSize * 0.3, 0,
+                    screenX, screenY, projSize
+                );
+                orbGradient.addColorStop(0, 'rgba(255, 192, 203, 1)');
+                orbGradient.addColorStop(0.6, 'rgba(255, 105, 180, 0.8)');
+                orbGradient.addColorStop(1, 'rgba(200, 60, 150, 0.4)');
+
+                ctx.fillStyle = orbGradient;
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, projSize, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Borde brillante
+                ctx.strokeStyle = `rgba(255, 192, 203, ${0.8 * scale})`;
+                ctx.lineWidth = 2.5 * scale;
+                ctx.stroke();
+
+                // Anillo adicional
+                ctx.strokeStyle = `rgba(255, 150, 200, ${0.4 * scale})`;
+                ctx.lineWidth = 1.5 * scale;
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, projSize * 1.3, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            drawPhotoFrame(ctx, proj) {
+                const { screenX, screenY, scale, projSize } = proj;
+                const w = projSize * 6; // Un poco más grande para que se luzca
+                const h = projSize * 6;
+
+                if (!this.img) {
+                    this.img = new Image();
+                    this.img.crossOrigin = "Anonymous"; // ESTO ES VITAL para enlaces de internet
+                    this.img.src = this.content;
+                }
+
+                ctx.save();
+
+                // Resplandor de la foto
+                ctx.shadowColor = 'rgba(255, 105, 180, 0.9)';
+                ctx.shadowBlur = 25;
+
+                if (this.img.complete && this.img.naturalWidth !== 0) {
+                    // Si la foto cargó, la dibuja
+                    ctx.drawImage(this.img, screenX - w / 2, screenY - h / 2, w, h);
+
+                    // Marco elegante
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                    ctx.lineWidth = 2 * scale;
+                    ctx.strokeRect(screenX - w / 2, screenY - h / 2, w, h);
+                } else {
+                    // Mientras carga o si falla, muestra un corazón pulsante
+                    ctx.fillStyle = 'rgba(255, 105, 180, 0.3)';
+                    ctx.beginPath();
+                    ctx.arc(screenX, screenY, projSize * 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = 'white';
+                    ctx.font = `${projSize * 2}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText('💖', screenX, screenY + 5);
+                }
+
+                ctx.restore();
+            }
+        }
+
+        // Inicializar objetos
+        function initObjects() {
+            objects = [];
+            let id = 0;
+
+            PHRASES.forEach((phrase, index) => {
+                const angle = (index / PHRASES.length) * Math.PI * 2;
+                objects.push(new FloatingObject(`phrase-${id++}`, 'phrase', phrase, angle, 60, 30));
+            });
+
+            PHOTOS.forEach((photo, index) => {
+                const angle = (index / PHOTOS.length) * Math.PI * 2 + Math.PI / 3;
+                objects.push(new FloatingObject(`photo-${id++}`, 'photo', photo, angle, 80, 40));
+            });
+        }
+
+        // Dibujar galaxia de partículas de fondo
+        function drawGalaxyBackground(centerX, centerY) {
+            const particleCount = isMobile ? 300 : 500;
+            for (let i = 0; i < particleCount; i++) {
+                const angle = (i / particleCount) * Math.PI * 2 + rotation.y * 0.0002;
+                const distance = 30 + (i % 150) * 1.2;
+                const x = centerX + Math.cos(angle) * distance;
+                const y = centerY + Math.sin(angle) * distance;
+
+                const brightness = Math.sin(frameCount * 0.008 + i * 0.01) * 0.5 + 0.5;
+                const size = 0.5 + Math.sin(frameCount * 0.01 + i) * 0.3;
+
+                ctx.fillStyle = `rgba(200, 120, 180, ${brightness * 0.35})`;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Líneas de conexión entre objetos
+            for (let i = 0; i < objects.length; i++) {
+                for (let j = i + 1; j < objects.length; j++) {
+                    const scale1 = (camera.z + objects[i].z) / camera.z;
+                    const scale2 = (camera.z + objects[j].z) / camera.z;
+
+                    const x1 = centerX + objects[i].x * scale1 * (canvas.width / 280);
+                    const y1 = centerY + objects[i].y * scale1 * (canvas.height / 280);
+                    const x2 = centerX + objects[j].x * scale2 * (canvas.width / 280);
+                    const y2 = centerY + objects[j].y * scale2 * (canvas.height / 280);
+
+                    const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+
+                    if (distance < 150) {
+                        ctx.strokeStyle = `rgba(255, 105, 180, ${(1 - distance / 150) * 0.15})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(x1, y1);
+                        ctx.lineTo(x2, y2);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // Loop de animación principal
+        function animate() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            // Fondo gradiente
+            const gradient = ctx.createRadialGradient(
+                centerX, centerY, 0,
+                centerX, centerY, Math.max(canvas.width, canvas.height)
+            );
+            gradient.addColorStop(0, 'rgba(40, 10, 60, 1)');
+            gradient.addColorStop(0.4, 'rgba(20, 5, 35, 0.95)');
+            gradient.addColorStop(1, 'rgba(10, 0, 20, 1)');
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Dibujar galaxia de fondo
+            drawGalaxyBackground(centerX, centerY);
+
+            // Actualizar y proyectar objetos
+            objects.forEach(obj => obj.update());
+
+            const projected = objects.map(obj => ({
+                ...obj,
+                ...obj.project(centerX, centerY)
+            })).sort((a, b) => a.depth - b.depth);
+
+            // Dibujar objetos
+            projected.forEach(proj => {
+                objects.find(o => o.id === proj.id)?.draw(ctx, proj);
+            });
+
+            // Actualizar rotación
+            rotation.y += 0.6;
+            rotation.x += 0.1;
+            frameCount++;
+
+            requestAnimationFrame(animate);
+        }
+
+        // Manejo de eventos del mouse
+        document.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            camera.z += e.deltaY * 0.1;
+            camera.z = Math.max(50, Math.min(300, camera.z));
+        });
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            objects.forEach(obj => {
+                const proj = obj.project(centerX, centerY);
+                const distance = Math.sqrt(
+                    (clickX - proj.screenX) ** 2 + (clickY - proj.screenY) ** 2
+                );
+
+                if (distance < proj.projSize * 3 && obj.type === 'phrase') {
+                    openModal(obj.content);
+                }
+            });
+        });
+
+        // Manejo del modal
+        let currentPhraseId = null;
+
+        function openModal(phrase) {
+            const phraseObj = objects.find(obj => obj.content === phrase);
+            if (phraseObj) currentPhraseId = phraseObj.id;
+            document.getElementById('phraseText').textContent = phrase;
+            document.getElementById('phraseModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('phraseModal').classList.remove('active');
+            currentPhraseId = null;
+        }
+
+        function removePhrase() {
+            if (currentPhraseId) {
+                objects = objects.filter(obj => obj.id !== currentPhraseId);
+                closeModal();
+            }
+        }
+
+        function goToValentine() {
+            const transition = document.getElementById('pageTransition');
+            transition.classList.add('active');
+            setTimeout(() => {
+                window.location.href = 'miamor.html';
+            }, 300);
+        }
+
+        document.getElementById('phraseModal').addEventListener('click', (e) => {
+            if (e.target.id === 'phraseModal') {
+                closeModal();
+            }
+        });
+
+        // Verificar si es San Valentín
+        function detectTimezone() {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            return tz;
+        }
+
+        function isVenezuela() {
+            const tz = detectTimezone();
+            return tz.includes('America/Caracas') || tz.includes('Venezuela');
+        }
+
+        function getTimezoneMexico() {
+            // Crear fecha en zona horaria de México (CDMX - UTC-6)
+            const date = new Date();
+            const mexicoTime = new Date(date.toLocaleString('es-MX', { timeZone: 'America/Mexico_City' }));
+            return mexicoTime;
+        }
+
+        function getTimezoneVenezuela() {
+            // Crear fecha en zona horaria de Venezuela (UTC-4)
+            const date = new Date();
+            const venezuelaTime = new Date(date.toLocaleString('es-VE', { timeZone: 'America/Caracas' }));
+            return venezuelaTime;
+        }
+
+        function getCurrentTime() {
+            // Usa Venezuela si está disponible, sino México
+            if (isVenezuela()) {
+                return getTimezoneVenezuela();
+            }
+            return getTimezoneMexico();
+        }
+
+        // Crear frases rotativas alrededor de la galaxia
+        function createRotatingPhrases() {
+            const container = document.getElementById('phraseContainer');
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const radius = Math.min(window.innerWidth, window.innerHeight) * 0.25;
+
+            ROTATING_PHRASES.forEach((phrase, index) => {
+                const angle = (index / ROTATING_PHRASES.length) * Math.PI * 2;
+                const phraseEl = document.createElement('div');
+                phraseEl.className = 'phrase-item';
+                phraseEl.textContent = phrase;
+                phraseEl.style.setProperty('--angle', `${angle}rad`);
+                phraseEl.style.setProperty('--radius', `${radius}px`);
+                phraseEl.style.animation = `rotatePhrase ${20 + index * 2}s linear infinite`;
+                container.appendChild(phraseEl);
+            });
+        }
+
+        // Crear estrellitas pulsantes hermosas
+        function createTwinkleStars() {
+            const starField = document.getElementById('starField');
+            const starCount = isMobile ? 30 : 50;
+            const starTypes = ['star-small', 'star-medium', 'star-large'];
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                const starType = starTypes[Math.floor(Math.random() * starTypes.length)];
+                star.className = `twinkle-star ${starType}`;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 4 + 's';
+                starField.appendChild(star);
+            }
+        }
+
+        // Agregar estilos de animación dinámicos
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes rotatePhrase {
+                0% {
+                    left: 50%;
+                    top: 50%;
+                    transform: translate(calc(-50% + var(--radius) * cos(var(--angle))), 
+                                         calc(-50% + var(--radius) * sin(var(--angle)))) rotate(var(--angle));
+                    opacity: 0.3;
+                }
+                50% {
+                    opacity: 0.8;
+                }
+                100% {
+                    left: 50%;
+                    top: 50%;
+                    transform: translate(calc(-50% + var(--radius) * cos(calc(var(--angle) + 360deg))), 
+                                         calc(-50% + var(--radius) * sin(calc(var(--angle) + 360deg)))) rotate(calc(var(--angle) + 360deg));
+                    opacity: 0.3;
+                }
+            }
+            
+            @media (prefers-reduced-motion: reduce) {
+                * {
+                    animation: none !important;
+                    transition: none !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Detectar si es dispositivo móvil
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // Mejorar controles táctiles para móvil
+        let touchStart = { x: 0, y: 0 };
+        let lastTouchTime = 0;
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                touchStart.x = e.touches[0].clientX;
+                touchStart.y = e.touches[0].clientY;
+                mouse.pressed = true;
+                lastTouchTime = Date.now();
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (mouse.pressed && e.touches.length === 1) {
+                const touchX = e.touches[0].clientX;
+                const touchY = e.touches[0].clientY;
+                const deltaX = touchX - touchStart.x;
+                const deltaY = touchY - touchStart.y;
+
+                rotation.y += deltaX * 0.008;
+                rotation.x += deltaY * 0.008;
+
+                touchStart.x = touchX;
+                touchStart.y = touchY;
+            }
+            // Pinch zoom para móvil
+            else if (e.touches.length === 2) {
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const distance = Math.hypot(
+                    touch2.clientX - touch1.clientX,
+                    touch2.clientY - touch1.clientY
+                );
+
+                if (lastDistance > 0) {
+                    camera.z += (lastDistance - distance) * 0.3;
+                    camera.z = Math.max(50, Math.min(300, camera.z));
+                }
+                lastDistance = distance;
+            }
+        }, { passive: true });
+
+        let lastDistance = 0;
+
+        canvas.addEventListener('touchend', (e) => {
+            mouse.pressed = false;
+            lastDistance = 0;
+        }, { passive: true });
+
+        // Iniciar
+        createRotatingPhrases();
+        createTwinkleStars();
+        initObjects();
+        animate();
+    </script>
+</body>
+
+</html>
